@@ -1,46 +1,4 @@
 #!/bin/bash
-
-##find all Timezones in the computer
-function findAllTimeZones() {
-	
-	for i in $(ls /usr/share/zoneinfo) 
-	do
-		if [[ -d /usr/share/zoneinfo/$i ]]; then
-			for j in $(ls /usr/share/zoneinfo/$i)
-			do
-				echo "$i/$j"
-			done
-		fi
-	done
-}
-
-#findAllTimeZones
-
-## find Timezone hour set (args; $1 : timezone ex:America/Los_Angeles)
-function findTimeZoneHourSet() {
-	export TZ=America/Los_Angeles
-	#export TZ=$1
-	declare -i TZHOUR=$(date +%H) 
-	declare -i UTCHOUR=$(date -u +%H)
-	let RESULT=$TZHOUR-$UTCHOUR
-	echo $RESULT
-	
-}
-
-#findTimeZoneHourSet
-
-
-## create icalendar created field
-## creates the content for created field using date time info right now
-function createIcalendarCREATED() {
-	
-	DATEFIELD=$(date +%Y%m%d)
-	HOURFIELD=$(date +%H%M%S)	
-	ICALDATETIME="$DATEFIELD""T""$HOURFIELD""Z"
-	echo $ICALDATETIME
-}
-#createIcalendarCREATED
-
 ## create icalendar datetime $1:day $2:month $3: year $4:hour $5:minute
 function createIcalendarDatetime() {
 	DATEFIELD="$3$2$1"
@@ -95,44 +53,44 @@ function normalDateToIcalendar() {
 ## readTheFileFromDialog reads the file that dialog interface has created temporarily and changes it into Icalendar format
 ## takes no argument
 function readTheFileFromDialogAndWriteToIcs() {
-	EVENTNAME=$(head -1 /tmp/draft | tail -1)
-	LOCATION=$(head -2 /tmp/draft | tail -1)
-	TIMEZONE=$(head -3 /tmp/draft | tail -1)
-	FROMDATE=$(head -4 /tmp/draft | tail -1)
-	FROMTIME=$(head -5 /tmp/draft | tail -1)
-	TODATE=$(head -6 /tmp/draft | tail -1)
-	TOTIME=$(head -7 /tmp/draft | tail -1)
-	NOTE=$(head -8 /tmp/draft | tail -1)
+	EVENTNAME=$(head -1 /tmp/shicalba-temp/draft | tail -1)
+	LOCATION=$(head -2 /tmp/shicalba-temp/draft | tail -1)
+	TIMEZONE=$(head -3 /tmp/shicalba-temp/draft | tail -1)
+	FROMDATE=$(head -4 /tmp/shicalba-temp/draft | tail -1)
+	FROMTIME=$(head -5 /tmp/shicalba-temp/draft | tail -1)
+	TODATE=$(head -6 /tmp/shicalba-temp/draft | tail -1)
+	TOTIME=$(head -7 /tmp/shicalba-temp/draft | tail -1)
+	NOTE=$(head -8 /tmp/shicalba-temp/draft | tail -1)
 	
 	CALUID=$(createIcalendarUID)
 	
-	echo "BEGIN:VCALENDAR" > /tmp/temp_cal.ics.tmp
-	echo "VERSION:2.0" >> /tmp/temp_cal.ics.tmp
-	echo "PRODID:-//Shicalba .//shicalba 1.0.0//EN" >> /tmp/temp_cal.ics.tmp
-	echo "CALSCALE:GREGORIAN" >> /tmp/temp_cal.ics.tmp
-	echo "BEGIN:VEVENT" >> /tmp/temp_cal.ics.tmp
-	echo "CREATED:""$(createIcalendarCREATED)" >> /tmp/temp_cal.ics.tmp
-	echo "UID:""$CALUID" >> /tmp/temp_cal.ics.tmp
-	echo "DTEND;TZID=""$TIMEZONE"":""$(normalDateToIcalendar $FROMDATE $FROMTIME)" >> /tmp/temp_cal.ics.tmp
-	echo "TRANSP:OPAQUE" >> /tmp/temp_cal.ics.tmp
-	echo "SUMMARY:""$EVENTNAME" >> /tmp/temp_cal.ics.tmp
-	echo "DTSTART;TZID=""$TIMEZONE"":""$(normalDateToIcalendar $TODATE $TOTIME)" >> /tmp/temp_cal.ics.tmp
-	echo "DTSTAMP:""$(createIcalendarDTSTAMP)" >> /tmp/temp_cal.ics.tmp
-	echo "LOCATION:""$LOCATION" >> /tmp/temp_cal.ics.tmp
-	echo "SEQUENCE:5" >> /tmp/temp_cal.ics.tmp
-	echo "DESCRIPTION:""$NOTE" >> /tmp/temp_cal.ics.tmp
-	echo "END:VEVENT" >> /tmp/temp_cal.ics.tmp
-	echo "END:VCALENDAR" >> /tmp/temp_cal.ics.tmp
+	echo "BEGIN:VCALENDAR" > /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "VERSION:2.0" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "PRODID:-//Shicalba .//shicalba 1.0.0//EN" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "CALSCALE:GREGORIAN" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "BEGIN:VEVENT" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "CREATED:""$(createIcalendarCREATED)" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "UID:""$CALUID" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "DTEND;TZID=""$TIMEZONE"":""$(normalDateToIcalendar $FROMDATE $FROMTIME)" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "TRANSP:OPAQUE" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "SUMMARY:""$EVENTNAME" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "DTSTART;TZID=""$TIMEZONE"":""$(normalDateToIcalendar $TODATE $TOTIME)" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "DTSTAMP:""$(createIcalendarDTSTAMP)" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "LOCATION:""$LOCATION" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "SEQUENCE:5" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "DESCRIPTION:""$NOTE" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "END:VEVENT" >> /tmp/shicalba-temp/temp_cal.ics.tmp
+	echo "END:VCALENDAR" >> /tmp/shicalba-temp/temp_cal.ics.tmp
 	
-	mv /tmp/temp_cal.ics.tmp event-$CALUID.ics
-	rm /tmp/temp_cal.ics.tmp
+	mv /tmp/shicalba-temp/temp_cal.ics.tmp event-$CALUID.ics
+	rm /tmp/shicalba-temp/temp_cal.ics.tmp
 	
 
 ## readIcsFile function will read and parse the ics file and will report to a file(to be used in dialog) or as report.
-## $1: the ics file
-## $2: -r for report output, -f for file output
+## $1: -r for report output, -f for file output
+## $2: the ics file
 function readIcsFile() {
-	FILE="$1"
+	FILE="$2"
 	$FCONTENT=$(cat $FILE)
 	
 	## file exist check
@@ -232,7 +190,7 @@ function readIcsFile() {
 
 
 	## report mode: will be output to the command line if and input ics file is given
-	if [[ "$2" = "-r" ]]; then
+	if [[ "$1" = "-r" ]]; then
 		echo "Event Name: $EVENTNAME"
 		echo "Event Location: $LOCATION"
 		echo "Event Start Date: $NSTARTDAY/$NSTARTMONTH/$NSTARTYEAR"
@@ -246,17 +204,113 @@ function readIcsFile() {
 	
 	
 	## edit mode: will be written to a file /tmp/cal_dialog.tmp and will be shown in dialog to be edited
-	if [[ "$2" = "-f" ]]; then
-		echo "$EVENTNAME" > /tmp/cal_dialog.tmp
-		echo "$LOCATION" >> /tmp/cal_dialog.tmp
-		echo "$NSTARTDAY/$NSTARTMONTH/$NSTARTYEAR" >> /tmp/cal_dialog.tmp
-		echo "$STARTTIMEZONE" >> /tmp/cal_dialog.tmp
-		echo "$NSTARTHOUR:$NSTARTMINUTE:$NSTARTSECOND" >> /tmp/cal_dialog.tmp
-		echo "$NSTARTDAY/$NSTARTMONTH/$NSTARTYEAR" >> /tmp/cal_dialog.tmp
-		echo "$TIMEZONE" >> /tmp/cal_dialog.tmp
-		echo "$NENDHOUR:$NENDMINUTE:$NENDSECOND" >> /tmp/cal_dialog.tmp
-		echo "$DESCRIPTION" >> /tmp/cal_dialog.tmp
+	if [[ "$1" = "-f" ]]; then
+		echo "$EVENTNAME" > /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$LOCATION" >> /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$NSTARTDAY/$NSTARTMONTH/$NSTARTYEAR" >> /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$STARTTIMEZONE" >> /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$NSTARTHOUR:$NSTARTMINUTE:$NSTARTSECOND" >> /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$NSTARTDAY/$NSTARTMONTH/$NSTARTYEAR" >> /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$TIMEZONE" >> /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$NENDHOUR:$NENDMINUTE:$NENDSECOND" >> /tmp/shicalba-temp/cal_dialog.tmp
+		echo "$DESCRIPTION" >> /tmp/shicalba-temp/cal_dialog.tmp
 	fi
 }
 
 #readIcsFile event.ics -r
+
+function findAllTimeZonesModified() {
+	declare -i inc=0
+        
+        for i in $(ls /usr/share/zoneinfo) 
+        do
+                if [[ -d /usr/share/zoneinfo/$i ]]; then
+                        for j in $(ls /usr/share/zoneinfo/$i)
+                        do
+                                echo -n "$i/$j \"\" off "
+                        done
+                fi
+        done
+}
+
+function findAllTimeZones() {
+        
+        for i in $(ls /usr/share/zoneinfo) 
+        do
+                if [[ -d /usr/share/zoneinfo/$i ]]; then
+                        for j in $(ls /usr/share/zoneinfo/$i)
+                        do
+                                echo "$i/$j"
+                        done
+                fi
+        done
+}
+
+function findZones() {
+	declare -i inc=0
+        
+        for i in $(ls /usr/share/zoneinfo) 
+        do
+                if [[ -d /usr/share/zoneinfo/$i ]]; then
+                        for j in $(ls /usr/share/zoneinfo/$i)
+                        do
+                                echo "$i"
+                        done
+                fi
+        done
+}
+
+function modifiedZones() {
+	export -f findZones
+	declare -i inc=0
+        
+        for i in $(findZones | uniq | sed '/posix/,/SystemV/d') 
+        do
+        	echo -n "$i \"\" off "
+        done
+}
+
+function modifiedZonesWithContinent() {
+	export -f findZones
+	declare -i inc=0
+        
+        for i in $(findZones | uniq | sed '/posix/,/SystemV/d') 
+        do
+		if [[ $1 = "$i" ]]
+		then
+        		echo -n "$i \"\" on "
+		else
+			echo -n "$i \"\" off "
+		fi
+        done
+}
+
+function modifyZones(){
+	export -f findAllTimeZones
+	
+	userZone=`cat /tmp/temp`
+	userZone=$userZone"/"
+
+        for i in $(findAllTimeZones | grep $userZone) 
+        do
+        	echo -n "$i \"\" off "
+        done
+}
+
+function modifyZonesWithRegion(){
+	export -f findAllTimeZones
+	
+	userZone=`cat /tmp/temp`
+	userZone=$userZone"/"
+
+        for i in $(findAllTimeZones | grep $userZone) 
+        do
+		if [[ $1 = "$i" ]]
+		then
+        		echo -n "$i \"\" on "
+		else
+			echo -n "$i \"\" off "
+		fi
+        done
+}
+
